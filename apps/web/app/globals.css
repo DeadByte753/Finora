@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme colors as RGB channels so Tailwind can apply opacity. */
+:root {
+  --bg: 244 246 250;
+  --surface: 255 255 255;
+  --surface-alt: 238 241 246;
+  --ink: 11 27 63;
+  --muted: 91 100 120;
+  --line: 11 27 63;
+  --shade: 11 27 63;
+  --track: 238 241 246;
+  --positive: 4 120 87;
+  --warn: 146 64 14;
+  --warn-bg: 254 246 231;
+  --over: 178 60 10;
+  --over-bg: 255 241 232;
+  --ok-bg: 236 253 245;
+  --hero: 11 27 63;
+  --primary: 11 27 63;
+  --on-primary: 255 255 255;
+  --grid: rgba(11, 27, 63, 0.035);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 7 13 31;
+  --surface: 16 28 58;
+  --surface-alt: 27 39 71;
+  --ink: 232 237 247;
+  --muted: 154 166 194;
+  --line: 46 66 117;
+  --shade: 0 6 17;
+  --track: 27 39 71;
+  --positive: 52 211 153;
+  --warn: 252 211 77;
+  --warn-bg: 56 42 12;
+  --over: 253 186 116;
+  --over-bg: 58 30 16;
+  --ok-bg: 10 51 41;
+  --hero: 15 35 80;
+  --primary: 16 185 129;
+  --on-primary: 11 27 63;
+  --grid: rgba(110, 231, 183, 0.04);
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-bg font-body text-ink antialiased;
+    font-size: 20px;
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+  h1, h2, h3 { @apply font-pixel; }
+  :focus-visible { outline: 3px solid #10B981; outline-offset: 2px; }
+}
+
+@layer components {
+  .px-card {
+    @apply border-[3px] border-line bg-surface p-5 shadow-px;
+    transition: transform 0.16s steps(3), box-shadow 0.16s steps(3);
+  }
+  .px-card:hover { transform: translate(-3px, -3px); box-shadow: 8px 8px 0 #10B981; }
+
+  .px-hero {
+    @apply relative overflow-hidden bg-hero p-6 text-white shadow-px-mint;
+    background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 4px);
+  }
+  .px-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent, rgba(110, 231, 183, 0.16), transparent);
+    transform: translateX(-120%);
+    animation: fx-shine 4s steps(16) 1.2s infinite;
+  }
+
+  .px-btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 border-[3px] border-line bg-surface px-4 text-[20px] text-ink shadow-px-sm;
+    transition: transform 0.1s steps(2), box-shadow 0.1s steps(2);
+  }
+  .px-btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #10B981; }
+  .px-btn:active { transform: translate(3px, 3px); box-shadow: none; }
+  .px-btn-primary { @apply bg-primary text-on-primary; }
+  .px-btn-mint { @apply bg-mint text-navy-900; }
+
+  .px-input {
+    @apply min-h-[48px] w-full border-[3px] border-line bg-surface px-3 text-[20px] text-ink shadow-px-sm;
+  }
+  .px-label { @apply mb-1 block text-[18px] text-muted; }
+
+  .px-money { @apply font-pixel whitespace-nowrap; }
+
+  .px-track { @apply h-3 w-full overflow-hidden border-2 border-line bg-track; }
+  .px-bar {
+    @apply relative h-full overflow-hidden;
+    transform-origin: left;
+    animation: fx-grow 1.4s steps(14) 0.5s both;
+  }
+  .px-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 -40%;
+    width: 30%;
+    background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.5) 0 4px, transparent 4px 8px);
+    animation: fx-scan 2.4s steps(12) 2s infinite;
+  }
+
+  .px-tag { @apply inline-block whitespace-nowrap border-2 border-line px-2 text-[16px]; }
+
+  .cursor::after { content: '_'; color: #10B981; animation: fx-blink 1s steps(1) infinite; }
+
+  .stagger > * { animation: fx-in 0.7s steps(7) both; }
+  .stagger > :nth-child(2) { animation-delay: 0.08s; }
+  .stagger > :nth-child(3) { animation-delay: 0.16s; }
+  .stagger > :nth-child(4) { animation-delay: 0.24s; }
+  .stagger > :nth-child(5) { animation-delay: 0.32s; }
+  .stagger > :nth-child(n + 6) { animation-delay: 0.4s; }
+
+  .logo-bob { animation: fx-bob 1.6s steps(4) infinite; }
+  .logo-bob:hover { animation: fx-flip 0.6s steps(8); }
+  .glitch { display: inline-block; animation: fx-glitch 5s steps(1) infinite; }
+  .shake { animation: fx-shake 0.4s steps(4) 1.6s 3; }
+  .sparkle { position: relative; animation: fx-glow 1.2s steps(3) infinite; }
+
+  .wipe {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    pointer-events: none;
+    background-color: #10B981;
+    background-image: linear-gradient(45deg, #0B1B3F 25%, transparent 25%, transparent 75%, #0B1B3F 75%),
+      linear-gradient(45deg, #0B1B3F 25%, transparent 25%, transparent 75%, #0B1B3F 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 8px 8px;
+    animation: fx-wipe 0.75s steps(15) both;
+  }
+
+  .coin {
+    position: absolute;
+    bottom: -40px;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #7C2D12;
+    background: #F59E0B;
+    box-shadow: inset -3px -3px 0 #D97706;
+    color: #7C2D12;
+    font: 10px/18px var(--font-pixel), monospace;
+    text-align: center;
+    opacity: 0.8;
+    animation: fx-float 8s steps(32) infinite;
+  }
+}
+
+@keyframes fx-in { 0% { opacity: 0; transform: translateY(24px) scale(0.96); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes fx-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fx-scan { to { left: 110%; } }
+@keyframes fx-shine { to { transform: translateX(300%); } }
+@keyframes fx-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes fx-blink { 50% { opacity: 0; } }
+@keyframes fx-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@keyframes fx-flip { from { transform: perspective(200px) rotateY(0); } to { transform: perspective(200px) rotateY(360deg); } }
+@keyframes fx-glow { 0%, 100% { box-shadow: 0 0 0 0 #10B981; } 50% { box-shadow: 0 0 0 6px #6EE7B7; } }
+@keyframes fx-glitch {
+  0%, 88%, 100% { text-shadow: none; transform: none; }
+  90% { text-shadow: 2px 0 #EA580C, -2px 0 #10B981; transform: translateX(1px); }
+  92% { text-shadow: -3px 0 #EA580C, 3px 0 #10B981; transform: translateX(-2px) skewX(-8deg); }
+  94% { text-shadow: 1px 0 #EA580C, -1px 0 #10B981; transform: none; }
+}
+@keyframes fx-wipe { 0% { clip-path: inset(0 100% 0 0); } 45%, 55% { clip-path: inset(0); } 100% { clip-path: inset(0 0 0 100%); } }
+@keyframes fx-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-1100px) rotate(360deg); } }
+@keyframes fx-type { to { width: 26ch; } }
+@keyframes fx-reveal { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes fx-boot-out { 0% { clip-path: inset(0); } 99% { clip-path: inset(0 0 100% 0); } 100% { clip-path: inset(0 0 100% 0); visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .wipe, .boot, .coin { display: none !important; }
+}

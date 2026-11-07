@@ -1,0 +1,26 @@
+{
+  "name": "finora",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Finora - Every Peso. Every Purpose. Student finance for web and mobile.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "npm run dev --workspace @finora/web",
+    "dev:mobile": "npm run start --workspace @finora/mobile",
+    "build": "turbo run build",
+    "test": "npm run test --workspace @finora/core",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.3"
+  },
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=20.11"
+  }
+}

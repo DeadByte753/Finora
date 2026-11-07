@@ -62,7 +62,7 @@
 @layer components {
   .px-card {
     @apply border-[3px] border-line bg-surface p-5 shadow-px;
-    transition: transform 0.16s steps(3), box-shadow 0.16s steps(3);
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .px-card:hover { transform: translate(-3px, -3px); box-shadow: 8px 8px 0 #10B981; }
 
@@ -78,12 +78,13 @@
     pointer-events: none;
     background: linear-gradient(100deg, transparent, rgba(110, 231, 183, 0.16), transparent);
     transform: translateX(-120%);
-    animation: fx-shine 4s steps(16) 1.2s infinite;
+    animation: fx-shine 4s ease-in-out 1.2s infinite;
+    will-change: transform;
   }
 
   .px-btn {
     @apply inline-flex min-h-[44px] items-center justify-center gap-2 border-[3px] border-line bg-surface px-4 text-[20px] text-ink shadow-px-sm;
-    transition: transform 0.1s steps(2), box-shadow 0.1s steps(2);
+    transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
   }
   .px-btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #10B981; }
   .px-btn:active { transform: translate(3px, 3px); box-shadow: none; }
@@ -101,33 +102,46 @@
   .px-bar {
     @apply relative h-full overflow-hidden;
     transform-origin: left;
-    animation: fx-grow 1.4s steps(14) 0.5s both;
+    animation: fx-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
   }
   .px-bar::after {
     content: '';
     position: absolute;
-    inset: 0 auto 0 -40%;
+    inset: 0 auto 0 0;
     width: 30%;
+    transform: translateX(-140%);
+    will-change: transform;
     background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.5) 0 4px, transparent 4px 8px);
-    animation: fx-scan 2.4s steps(12) 2s infinite;
+    animation: fx-scan 2.4s ease-in-out 2s infinite;
   }
 
   .px-tag { @apply inline-block whitespace-nowrap border-2 border-line px-2 text-[16px]; }
 
   .cursor::after { content: '_'; color: #10B981; animation: fx-blink 1s steps(1) infinite; }
 
-  .stagger > * { animation: fx-in 0.7s steps(7) both; }
+  .stagger > * { animation: fx-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
   .stagger > :nth-child(2) { animation-delay: 0.08s; }
   .stagger > :nth-child(3) { animation-delay: 0.16s; }
   .stagger > :nth-child(4) { animation-delay: 0.24s; }
   .stagger > :nth-child(5) { animation-delay: 0.32s; }
   .stagger > :nth-child(n + 6) { animation-delay: 0.4s; }
 
-  .logo-bob { animation: fx-bob 1.6s steps(4) infinite; }
-  .logo-bob:hover { animation: fx-flip 0.6s steps(8); }
+  .logo-bob { animation: fx-bob 1.6s ease-in-out infinite; }
+  .logo-bob:hover { animation: fx-flip 0.6s ease-in-out; }
   .glitch { display: inline-block; animation: fx-glitch 5s steps(1) infinite; }
-  .shake { animation: fx-shake 0.4s steps(4) 1.6s 3; }
-  .sparkle { position: relative; animation: fx-glow 1.2s steps(3) infinite; }
+  .shake { animation: fx-shake 0.4s ease-in-out 1.6s 3; }
+  .sparkle { position: relative; isolation: isolate; }
+  .sparkle::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    z-index: -1;
+    pointer-events: none;
+    background: #6EE7B7;
+    opacity: 0;
+    animation: fx-glow 1.2s ease-in-out infinite;
+    will-change: opacity, transform;
+  }
 
   .wipe {
     position: fixed;
@@ -139,7 +153,7 @@
       linear-gradient(45deg, #0B1B3F 25%, transparent 25%, transparent 75%, #0B1B3F 75%);
     background-size: 16px 16px;
     background-position: 0 0, 8px 8px;
-    animation: fx-wipe 0.75s steps(15) both;
+    animation: fx-wipe 0.7s cubic-bezier(0.65, 0, 0.35, 1) both;
   }
 
   .coin {
@@ -154,19 +168,20 @@
     font: 10px/18px var(--font-pixel), monospace;
     text-align: center;
     opacity: 0.8;
-    animation: fx-float 8s steps(32) infinite;
+    animation: fx-float 8s linear infinite;
+    will-change: transform;
   }
 }
 
 @keyframes fx-in { 0% { opacity: 0; transform: translateY(24px) scale(0.96); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
 @keyframes fx-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes fx-scan { to { left: 110%; } }
+@keyframes fx-scan { from { transform: translateX(-140%); } to { transform: translateX(400%); } }
 @keyframes fx-shine { to { transform: translateX(300%); } }
 @keyframes fx-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 @keyframes fx-blink { 50% { opacity: 0; } }
 @keyframes fx-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 @keyframes fx-flip { from { transform: perspective(200px) rotateY(0); } to { transform: perspective(200px) rotateY(360deg); } }
-@keyframes fx-glow { 0%, 100% { box-shadow: 0 0 0 0 #10B981; } 50% { box-shadow: 0 0 0 6px #6EE7B7; } }
+@keyframes fx-glow { 0%, 100% { opacity: 0; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
 @keyframes fx-glitch {
   0%, 88%, 100% { text-shadow: none; transform: none; }
   90% { text-shadow: 2px 0 #EA580C, -2px 0 #10B981; transform: translateX(1px); }
@@ -176,6 +191,10 @@
 @keyframes fx-wipe { 0% { clip-path: inset(0 100% 0 0); } 45%, 55% { clip-path: inset(0); } 100% { clip-path: inset(0 0 0 100%); } }
 @keyframes fx-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-1100px) rotate(360deg); } }
 @keyframes fx-type { to { width: 26ch; } }
+@keyframes fx-spin-in { from { opacity: 0; transform: rotate(-120deg) scale(0.4); } to { opacity: 1; transform: none; } }
+/* Theme switch: the old and new page snapshots are animated from ThemeToggle, so turn off the default cross-fade. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 1; }
 @keyframes fx-reveal { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
 @keyframes fx-boot-out { 0% { clip-path: inset(0); } 99% { clip-path: inset(0 0 100% 0); } 100% { clip-path: inset(0 0 100% 0); visibility: hidden; } }
 

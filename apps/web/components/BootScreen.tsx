@@ -25,11 +25,11 @@ export function BootScreen() {
   return (
     <div
       className="boot fixed inset-0 z-[60] flex items-center justify-center bg-navy-900"
-      style={{ animation: 'fx-boot-out .6s steps(10) 1.9s both', backgroundImage: 'repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,transparent 2px 4px)' }}
+      style={{ animation: 'fx-boot-out .6s cubic-bezier(.65,0,.35,1) 1.9s both', backgroundImage: 'repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,transparent 2px 4px)' }}
       aria-hidden="true"
     >
       <div className="flex flex-col items-center gap-5">
-        <LogoMark size={76} className="[animation:fx-reveal_.6s_steps(8)_both]" />
+        <LogoMark size={76} className="[animation:fx-reveal_.6s_cubic-bezier(.16,1,.3,1)_both]" />
         <span className="glitch font-pixel text-[22px] text-white">FINORA</span>
         <span
           className="overflow-hidden whitespace-nowrap border-r-[3px] border-mint-300 font-body text-[24px] text-mint-300"
@@ -38,7 +38,7 @@ export function BootScreen() {
           {TAGLINE}
         </span>
         <span className="h-4 w-44 border-[3px] border-mint-300 p-[2px]">
-          <span className="block h-full bg-mint [animation:fx-grow_1.5s_steps(10)_.2s_both] [transform-origin:left]" />
+          <span className="block h-full bg-mint [animation:fx-grow_1.5s_cubic-bezier(.16,1,.3,1)_.2s_both] [transform-origin:left]" />
         </span>
       </div>
     </div>

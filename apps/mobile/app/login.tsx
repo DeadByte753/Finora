@@ -39,7 +39,15 @@ export default function Login() {
     try {
       if (mode === 'in') {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) setMsg({ error: 'That email and password don’t match. Try again.' });
+        if (error)
+          setMsg({
+            error:
+              error.code === 'email_not_confirmed'
+                ? 'Confirm your email first. Open the link we sent you, then sign in.'
+                : error.code === 'invalid_credentials'
+                  ? 'That email and password don’t match. Try again.'
+                  : error.message
+          });
       } else {
         if (!name.trim()) return setMsg({ error: 'Enter your name.' });
         if (password.length < 8) return setMsg({ error: 'Use at least 8 characters for your password.' });

@@ -3,7 +3,6 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, type Pre
 import Animated, {
   Easing,
   FadeInDown,
-  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -105,7 +104,7 @@ export function Card({ children, style, index = 0, tone }: { children: React.Rea
   );
 }
 
-/** Progress bar that fills in steps after the card appears. */
+/** Progress bar that fills smoothly after the card appears. */
 export function Bar({ pct, color = '#10B981', label }: { pct: number; color?: string; label: string }) {
   const { colors } = useTheme();
   const w = useSharedValue(0);
@@ -113,7 +112,7 @@ export function Bar({ pct, color = '#10B981', label }: { pct: number; color?: st
   useEffect(() => {
     w.value = withDelay(400, withTiming(target, { duration: 1200, easing: Easing.out(Easing.cubic) }));
   }, [target, w]);
-  const style = useAnimatedStyle(() => ({ width: `${Math.round(w.value / 7) * 7 > 100 ? 100 : Math.round(w.value / 7) * 7}%` }));
+  const style = useAnimatedStyle(() => ({ width: `${Math.min(100, w.value)}%` }));
   return (
     <View
       accessibilityRole="progressbar"
@@ -178,24 +177,27 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   );
 }
 
-/** Counts up to `value` (centavos) after a short delay. */
+/** Counts up to `value` (centavos) after a short delay, one update per frame. */
 export function CountUp({ value, size = 26, color = '#FFFFFF', delay = 300 }: { value: number; size?: number; color?: string; delay?: number }) {
   const reduce = useReducedMotion();
   const [shown, setShown] = useState(reduce ? value : 0);
-  const v = useSharedValue(0);
   useEffect(() => {
     if (reduce) return setShown(value);
-    v.value = 0;
-    v.value = withDelay(delay, withTiming(value, { duration: 1400, easing: Easing.out(Easing.cubic) }, () => runOnJS(setShown)(value)));
-    const id = setInterval(() => setShown(Math.round(v.value)), 40);
-    const stop = setTimeout(() => clearInterval(id), delay + 1500);
-    return () => {
-      clearInterval(id);
-      clearTimeout(stop);
+    const duration = 1400;
+    let frame = 0;
+    let start: number | undefined;
+    const tick = (now: number) => {
+      start ??= now + delay;
+      const t = Math.min(1, Math.max(0, (now - start) / duration));
+      setShown(Math.round(value * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
     };
-  }, [value, delay, reduce, v]);
+    setShown(0);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [value, delay, reduce]);
   return (
-    <Text numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: fonts.pixel, fontSize: size, lineHeight: size * 1.4, color }}>
+    <Text numberOfLines={1} style={{ fontFamily: fonts.pixel, fontSize: size, lineHeight: size * 1.4, color }}>
       {formatPeso(shown)}
     </Text>
   );

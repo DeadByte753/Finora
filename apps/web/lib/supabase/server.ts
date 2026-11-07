@@ -1,10 +1,11 @@
 import { createServerClient } from '@supabase/ssr';
+import { supabaseEnv } from './env';
 import { cookies } from 'next/headers';
 
 /** Supabase client for Server Components and Server Actions, signed in as the current user. */
 export async function createClient() {
   const store = await cookies();
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  return createServerClient(supabaseEnv().url, supabaseEnv().key, {
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {

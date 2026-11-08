@@ -102,7 +102,7 @@
   .px-bar {
     @apply relative h-full overflow-hidden;
     transform-origin: left;
-    animation: fx-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+    animation: fx-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s backwards;
   }
   .px-bar::after {
     content: '';
@@ -110,7 +110,6 @@
     inset: 0 auto 0 0;
     width: 30%;
     transform: translateX(-140%);
-    will-change: transform;
     background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.5) 0 4px, transparent 4px 8px);
     animation: fx-scan 2.4s ease-in-out 2s infinite;
   }
@@ -119,12 +118,14 @@
 
   .cursor::after { content: '_'; color: #10B981; animation: fx-blink 1s steps(1) infinite; }
 
-  .stagger > * { animation: fx-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .stagger > * { animation: fx-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
   .stagger > :nth-child(2) { animation-delay: 0.08s; }
   .stagger > :nth-child(3) { animation-delay: 0.16s; }
   .stagger > :nth-child(4) { animation-delay: 0.24s; }
   .stagger > :nth-child(5) { animation-delay: 0.32s; }
   .stagger > :nth-child(n + 6) { animation-delay: 0.4s; }
+  /* Long lists (e.g. transaction rows) would animate dozens of layers at once; rows past the first screenful just appear. */
+  .stagger > :nth-child(n + 13) { animation: none; }
 
   .logo-bob { animation: fx-bob 1.6s ease-in-out infinite; }
   .logo-bob:hover { animation: fx-flip 0.6s ease-in-out; }
@@ -140,7 +141,6 @@
     background: #6EE7B7;
     opacity: 0;
     animation: fx-glow 1.2s ease-in-out infinite;
-    will-change: opacity, transform;
   }
 
   .wipe {
@@ -154,6 +154,7 @@
     background-size: 16px 16px;
     background-position: 0 0, 8px 8px;
     animation: fx-wipe 0.7s cubic-bezier(0.65, 0, 0.35, 1) both;
+    will-change: transform;
   }
 
   .coin {
@@ -188,7 +189,7 @@
   92% { text-shadow: -3px 0 #EA580C, 3px 0 #10B981; transform: translateX(-2px) skewX(-8deg); }
   94% { text-shadow: 1px 0 #EA580C, -1px 0 #10B981; transform: none; }
 }
-@keyframes fx-wipe { 0% { clip-path: inset(0 100% 0 0); } 45%, 55% { clip-path: inset(0); } 100% { clip-path: inset(0 0 0 100%); } }
+@keyframes fx-wipe { 0% { transform: translateX(-100%); } 45%, 55% { transform: translateX(0); } 100% { transform: translateX(100%); } }
 @keyframes fx-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-1100px) rotate(360deg); } }
 @keyframes fx-type { to { width: 26ch; } }
 @keyframes fx-spin-in { from { opacity: 0; transform: rotate(-120deg) scale(0.4); } to { opacity: 1; transform: none; } }
@@ -196,7 +197,7 @@
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 ::view-transition-new(root) { z-index: 1; }
 @keyframes fx-reveal { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
-@keyframes fx-boot-out { 0% { clip-path: inset(0); } 99% { clip-path: inset(0 0 100% 0); } 100% { clip-path: inset(0 0 100% 0); visibility: hidden; } }
+@keyframes fx-boot-out { 0% { transform: translateY(0); } 99% { transform: translateY(-100%); } 100% { transform: translateY(-100%); visibility: hidden; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

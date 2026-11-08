@@ -21,12 +21,17 @@ export function CountUp({ value, className = '' }: { value: number; className?: 
     try {
       sessionStorage.setItem('finora-counted', '1');
     } catch {}
+    // Only touch the DOM when the shown amount actually changes; each write re-lays out the card.
+    let last = Number.NaN;
     const controls = animate(0, value, {
       duration: 1.4,
       delay: booting ? 2.3 : 0.3,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (v) => {
-        el.textContent = formatPeso(Math.round(v));
+        const n = Math.round(v);
+        if (n === last) return;
+        last = n;
+        el.textContent = formatPeso(n);
       }
     });
     return () => controls.stop();

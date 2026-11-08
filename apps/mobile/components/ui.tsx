@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, type PressableProps, type TextProps, type ViewStyle } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, type PressableProps, type TextProps, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
+  useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -104,7 +105,7 @@ export function Card({ children, style, index = 0, tone }: { children: React.Rea
   );
 }
 
-/** Progress bar that fills smoothly after the card appears. */
+/** Progress bar that fills smoothly after the card appears. Scales instead of resizing, so no layout pass per frame. */
 export function Bar({ pct, color = '#10B981', label }: { pct: number; color?: string; label: string }) {
   const { colors } = useTheme();
   const w = useSharedValue(0);
@@ -112,7 +113,7 @@ export function Bar({ pct, color = '#10B981', label }: { pct: number; color?: st
   useEffect(() => {
     w.value = withDelay(400, withTiming(target, { duration: 1200, easing: Easing.out(Easing.cubic) }));
   }, [target, w]);
-  const style = useAnimatedStyle(() => ({ width: `${Math.min(100, w.value)}%` }));
+  const style = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.min(100, w.value) / 100 }] }));
   return (
     <View
       accessibilityRole="progressbar"
@@ -120,7 +121,7 @@ export function Bar({ pct, color = '#10B981', label }: { pct: number; color?: st
       accessibilityValue={{ min: 0, max: 100, now: Math.round(target) }}
       style={{ height: 14, borderWidth: 2, borderColor: colors.outline, backgroundColor: colors.track, overflow: 'hidden' }}
     >
-      <Animated.View style={[{ height: '100%', backgroundColor: color }, style]} />
+      <Animated.View style={[{ height: '100%', backgroundColor: color, transformOrigin: 'left' }, style]} />
     </View>
   );
 }
@@ -177,29 +178,47 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   );
 }
 
-/** Counts up to `value` (centavos) after a short delay, one update per frame. */
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+
+/** Same output as formatPeso, written as a worklet (no Intl) so it can run on the UI thread every frame. */
+function pesoText(centavos: number) {
+  'worklet';
+  const abs = Math.abs(centavos);
+  const pesos = String(Math.floor(abs / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const cents = abs % 100;
+  return (centavos < 0 ? '\u2212' : '') + '\u20B1' + pesos + '.' + (cents < 10 ? '0' : '') + cents;
+}
+
+/**
+ * Counts up to `value` (centavos) after a short delay. The number is animated on the UI thread
+ * and written straight into a read-only native text field, so React never re-renders mid-count.
+ */
 export function CountUp({ value, size = 26, color = '#FFFFFF', delay = 300 }: { value: number; size?: number; color?: string; delay?: number }) {
   const reduce = useReducedMotion();
-  const [shown, setShown] = useState(reduce ? value : 0);
+  const shown = useSharedValue(reduce ? value : 0);
   useEffect(() => {
-    if (reduce) return setShown(value);
-    const duration = 1400;
-    let frame = 0;
-    let start: number | undefined;
-    const tick = (now: number) => {
-      start ??= now + delay;
-      const t = Math.min(1, Math.max(0, (now - start) / duration));
-      setShown(Math.round(value * (1 - Math.pow(1 - t, 3))));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    setShown(0);
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [value, delay, reduce]);
+    if (reduce) {
+      shown.value = value;
+      return;
+    }
+    shown.value = 0;
+    shown.value = withDelay(delay, withTiming(value, { duration: 1400, easing: Easing.out(Easing.cubic) }));
+  }, [value, delay, reduce, shown]);
+  const animatedProps = useAnimatedProps(() => {
+    const text = pesoText(Math.round(shown.value));
+    return { text, defaultValue: text } as object;
+  });
   return (
-    <Text numberOfLines={1} style={{ fontFamily: fonts.pixel, fontSize: size, lineHeight: size * 1.4, color }}>
-      {formatPeso(shown)}
-    </Text>
+    <AnimatedTextInput
+      editable={false}
+      caretHidden
+      underlineColorAndroid="transparent"
+      pointerEvents="none"
+      accessibilityLabel={formatPeso(value)}
+      defaultValue={formatPeso(reduce ? value : 0)}
+      animatedProps={animatedProps}
+      style={{ fontFamily: fonts.pixel, fontSize: size, lineHeight: size * 1.4, color, padding: 0, margin: 0 }}
+    />
   );
 }
 

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, type PressableProps, type TextProps, type ViewStyle } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, type PressableProps, type TextProps, type ViewProps, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
@@ -163,8 +163,12 @@ export function Btn({ title, variant = 'plain', style, ...rest }: PressableProps
   );
 }
 
-export function Row({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
-  return <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 10 }, style]}>{children}</View>;
+export function Row({ children, style, ...rest }: ViewProps & { style?: ViewStyle }) {
+  return (
+    <View {...rest} style={[{ flexDirection: 'row', alignItems: 'center', gap: 10 }, style]}>
+      {children}
+    </View>
+  );
 }
 
 /* ---------- brand ---------- */

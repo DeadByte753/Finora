@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type SetAllCookies } from '@supabase/ssr';
 import { supabaseEnv } from './lib/supabase/env';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -11,11 +11,11 @@ export async function middleware(request: NextRequest) {
   const supabase = createServerClient(supabaseEnv().url, supabaseEnv().key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
-      setAll: (list) => {
+      setAll: ((list) => {
         list.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
         list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-      }
+      }) satisfies SetAllCookies
     }
   });
 

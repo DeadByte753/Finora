@@ -16,7 +16,8 @@ const COINS = [
   { left: '90%', delay: '3.2s', dur: '8.5s' }
 ];
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ confirm?: string }> }) {
+  const { confirm } = await searchParams;
   const [first, second] = TAGLINE.split('. ');
   return (
     <div className="flex min-h-screen flex-wrap">
@@ -45,7 +46,7 @@ export default function LoginPage() {
       </section>
 
       <section className="flex flex-[1_1_420px] items-center justify-center p-8 sm:p-14">
-        <LoginForm />
+        <LoginForm notice={confirm === 'failed' ? 'That confirmation link didn’t work or has expired. Try signing in; if it says to confirm your email, create the account again to get a new link.' : undefined} />
       </section>
     </div>
   );

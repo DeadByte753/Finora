@@ -62,7 +62,16 @@ export const loadFinances = cache(async (): Promise<Finances> => {
   ]);
 
   const firstError = [profile, wallets, txs, transfers, budgets, goals, entries, bills].find((r) => r.error)?.error;
-  if (firstError) throw new Error(firstError.message);
+  if (firstError) {
+    // PGRST205: the table doesn't exist in this Supabase project, so the migrations were never run there.
+    if (firstError.code === 'PGRST205') {
+      throw new Error(
+        `${firstError.message}. The Finora tables are missing from the Supabase project in apps/web/.env.local. ` +
+          'Run the SQL files in supabase/migrations in order in that project (Supabase dashboard > SQL Editor), then reload.'
+      );
+    }
+    throw new Error(firstError.message);
+  }
 
   const p = profile.data;
   const timeZone = p?.time_zone ?? 'Asia/Manila';

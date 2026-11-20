@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { signIn, signUp, type AuthState } from './actions';
 
-export function LoginForm() {
+export function LoginForm({ notice }: { notice?: string }) {
   const [mode, setMode] = useState<'in' | 'up'>('in');
   const [inState, inAction, inPending] = useActionState<AuthState, FormData>(signIn, {});
   const [upState, upAction, upPending] = useActionState<AuthState, FormData>(signUp, {});
@@ -47,8 +47,8 @@ export function LoginForm() {
         <input id="password" name="password" type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} required minLength={mode === 'up' ? 8 : undefined} className="px-input" />
       </div>
 
-      <p aria-live="polite" className={state.error ? 'text-over' : 'text-positive'}>
-        {state.error ?? state.info ?? ''}
+      <p aria-live="polite" className={state.error || (!state.info && notice) ? 'text-over' : 'text-positive'}>
+        {state.error ?? state.info ?? notice ?? ''}
       </p>
 
       <button type="submit" disabled={pending} className="px-btn px-btn-primary min-h-[52px] disabled:opacity-60">

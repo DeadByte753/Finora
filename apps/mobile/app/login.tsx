@@ -52,7 +52,10 @@ export default function Login() {
         if (!name.trim()) return setMsg({ error: 'Enter your name.' });
         if (password.length < 8) return setMsg({ error: 'Use at least 8 characters for your password.' });
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { data: { full_name: name.trim() } } });
-        if (error) setMsg({ error: error.message });
+        if (error)
+          setMsg({ error: error.code === 'user_already_exists' ? 'That email already has an account. Sign in instead.' : error.message });
+        // Supabase returns a user with no identities when the email is already registered.
+        else if (data.user && data.user.identities?.length === 0) setMsg({ error: 'That email already has an account. Sign in instead.' });
         else if (!data.session) setMsg({ info: 'Check your email to confirm your account, then sign in.' });
       }
     } finally {
@@ -89,8 +92,8 @@ export default function Login() {
           {mode === 'up' && (
             <TextInput accessibilityLabel="Full name" placeholder="Full name" placeholderTextColor={colors.textMuted} value={name} onChangeText={setName} autoComplete="name" style={input} />
           )}
-          <TextInput accessibilityLabel="Email address" placeholder="juan@school.edu.ph" placeholderTextColor={colors.textMuted} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" style={input} />
-          <TextInput accessibilityLabel="Password" placeholder="Password" placeholderTextColor={colors.textMuted} value={password} onChangeText={setPassword} secureTextEntry autoComplete={mode === 'in' ? 'password' : 'new-password'} style={input} />
+          <TextInput accessibilityLabel="Email address" placeholder="juan@school.edu.ph" placeholderTextColor={colors.textMuted} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" autoComplete="email" style={input} />
+          <TextInput accessibilityLabel="Password" placeholder="Password" placeholderTextColor={colors.textMuted} value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete={mode === 'in' ? 'password' : 'new-password'} style={input} />
           {(msg.error || msg.info) && <T accessibilityLiveRegion="polite" style={{ color: msg.error ? colors.over : colors.positive }}>{msg.error ?? msg.info}</T>}
           <Btn title={busy ? 'One moment…' : mode === 'in' ? 'Sign in' : 'Create account'} variant="primary" disabled={busy} onPress={submit} />
           <T muted size={18} style={{ textAlign: 'center', fontFamily: fonts.body }}>Personal finance for students</T>
